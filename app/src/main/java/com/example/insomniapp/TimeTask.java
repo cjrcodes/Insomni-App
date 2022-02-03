@@ -14,7 +14,6 @@ public class TimeTask {
 
 
     public TimeTask(){
-        this.countDown = new CountDownTimer(900000, 1000);
 
     }
 
