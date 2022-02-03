@@ -14,6 +14,8 @@ public class TimeTask {
 
 
     public TimeTask(){
+        this.minHeartRate = 40;
+        this.maxHeartRate = 70;
 
     }
 
