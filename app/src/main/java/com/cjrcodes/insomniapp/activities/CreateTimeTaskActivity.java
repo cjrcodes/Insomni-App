@@ -1,8 +1,10 @@
-package com.example.insomniapp;
+package com.cjrcodes.insomniapp.activities;
 
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.widget.TextView;
+
+import com.cjrcodes.insomniapp.R;
 
 public class CreateTimeTaskActivity extends WearableActivity {
 

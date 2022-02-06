@@ -1,11 +1,13 @@
-package com.example.insomniapp;
+package com.cjrcodes.insomniapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.cjrcodes.insomniapp.R;
+import com.cjrcodes.insomniapp.TimeTask;
 
 public class MainActivity extends WearableActivity {
 
@@ -20,18 +22,12 @@ public class MainActivity extends WearableActivity {
         mTextView = (TextView) findViewById(R.id.text);
 
 
+        TimeTask tt = new TimeTask();
 
 
         // Enables Always-on
         setAmbientEnabled();
 
-        addTimeTaskButton = (Button) findViewById(R.id.addTimeTask);
-        addTimeTaskButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
-                openCreateTimeTaskActivity();
-            }
-        });
     }
 
     private void openCreateTimeTaskActivity() {
