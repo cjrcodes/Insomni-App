@@ -6,23 +6,45 @@ import android.support.wearable.activity.WearableActivity;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.wear.widget.WearableLinearLayoutManager;
+import androidx.wear.widget.WearableRecyclerView;
+
 import com.cjrcodes.insomniapp.R;
-import com.cjrcodes.insomniapp.TimeTask;
+import com.cjrcodes.insomniapp.models.TimeTask;
+import com.cjrcodes.insomniapp.views.TimeTaskAdapter;
+
+import java.util.ArrayList;
 
 public class MainActivity extends WearableActivity {
 
-    private Button addTimeTaskButton;
-    private TextView mTextView;
+   ArrayList<TimeTask> timeTasks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextView = (TextView) findViewById(R.id.text);
+        // Lookup the recyclerview in activity layout
+        WearableRecyclerView rvTimeTasks = findViewById(R.id.recycler_view_TimeTasks);
+
+        rvTimeTasks.setEdgeItemsCenteringEnabled(true);
 
 
-        TimeTask tt = new TimeTask();
+        rvTimeTasks.setLayoutManager(
+                new WearableLinearLayoutManager(this));
+
+        // Initialize TimeTask
+        timeTasks = TimeTask.createTimeTaskList(10);
+        // Create adapter passing in the sample user data
+        TimeTaskAdapter adapter = new TimeTaskAdapter(timeTasks);
+        // Attach the adapter to the recyclerview to populate items
+        rvTimeTasks.setAdapter(adapter);
+        // Set layout manager to position the items
+        rvTimeTasks.setLayoutManager(new LinearLayoutManager(this));
+
+
 
 
         // Enables Always-on
