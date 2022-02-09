@@ -13,16 +13,23 @@ import androidx.wear.widget.WearableRecyclerView;
 import com.cjrcodes.insomniapp.R;
 import com.cjrcodes.insomniapp.models.TimeTask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHolder> {
 
     // Store a member variable for the contacts
-    private List<TimeTask> mTimeTasks;
+    private List<TimeTask> mTimeTasks = new ArrayList<TimeTask>();
+    private Context mContext;
 
     // Pass in the contact array into the constructor
-    public TimeTaskAdapter(List<TimeTask> contacts) {
-        mTimeTasks = contacts;
+    public TimeTaskAdapter(List<TimeTask> timeTasks) {
+        mTimeTasks = timeTasks;
+    }
+
+    public TimeTaskAdapter(Context context, ArrayList<TimeTask> timeTasks) {
+        mTimeTasks = timeTasks;
+        mContext = context;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -36,7 +43,7 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
             // to access the context from any ViewHolder instance.
             super(itemView);
             nameTextView = (TextView) itemView.findViewById(R.id.time_task_info);
-            editButton = (Button) itemView.findViewById(R.id.edit_button);
+            //editButton = (Button) itemView.findViewById(R.id.edit_button);
         }
     }
 
@@ -59,9 +66,9 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
         TimeTask timeTask = mTimeTasks.get(position);
         // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
-        textView.setText(timeTask.convertMillisecondsToHourMinuteSecond(timeTask.getTime()));
-        Button button = holder.editButton;
-        button.setText("Edit");
+        //timeTask.convertMillisecondsToHourMinuteSecond(timeTask.getTime()) + " " + timeTask.getMaxHeartRate()
+        textView.setText("Time Task Placeholder");
+        //Button button = holder.editButton;
     }
 
     // Returns the total count of items in the list
