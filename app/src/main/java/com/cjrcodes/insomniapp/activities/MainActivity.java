@@ -43,11 +43,9 @@ public class MainActivity extends WearableActivity {
         rvTimeTasks.setEdgeItemsCenteringEnabled(true);
         rvTimeTasks.setCircularScrollingGestureEnabled(true);
         CustomScrollingLayoutCallback cslc = new CustomScrollingLayoutCallback();
-        ViewPager2 vp = new ViewPager2(this);
 
-        SnapHelper helper = new PagerSnapHelper();
+        SnapHelper helper = new LinearSnapHelper();
         helper.attachToRecyclerView(rvTimeTasks);
-
         rvTimeTasks.setLayoutManager(new WearableLinearLayoutManager(this, cslc));
 
 

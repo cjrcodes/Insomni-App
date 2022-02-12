@@ -42,7 +42,7 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
-            nameTextView = (TextView) itemView.findViewById(R.id.time_task_info);
+            nameTextView = (TextView) itemView.findViewById(R.id.button_time_task);
             //editButton = (Button) itemView.findViewById(R.id.edit_button);
         }
     }

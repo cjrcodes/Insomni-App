@@ -8,19 +8,16 @@
     android:paddingTop="5dp"
     android:paddingBottom="5dp">
 
-    <TextView
-        android:id="@+id/time_task_info"
-        android:layout_width="142dp"
-        android:layout_height="35dp"
 
-        android:layout_weight="1"
-        android:background="@color/blue_a400"
+    <Button
+        android:id="@+id/button_time_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="62dp"
+        android:layout_marginEnd="63dp"
+        android:layout_marginBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
-
-
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

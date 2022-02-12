@@ -106,7 +106,14 @@ public class TimeTask implements Serializable {
     public static ArrayList<TimeTask> createTimeTaskList(int numOfTimeTasks) {
         ArrayList<TimeTask> timeTasks = new ArrayList<TimeTask>();
         for (int i = 1; i <= numOfTimeTasks; i++) {
-            timeTasks.add(new TimeTask());
+            if(i % 2 != 0){
+                timeTasks.add(new TimeTask(AlarmType.CLOCK_TIME, 60000, 0, 70, HeartRateMeasurementType.CURRENT ));
+            }
+
+            else{
+                timeTasks.add(new TimeTask(AlarmType.ELAPSED_TIME, 60000, 900000, 70, HeartRateMeasurementType.AVERAGE ));
+
+            }
         }
         return timeTasks;
     }
