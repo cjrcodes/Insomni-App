@@ -1,40 +1,51 @@
 package com.cjrcodes.insomniapp.models;
 
 import java.io.Serializable;
-import java.sql.Time;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Christian Rodriguez
- * TimeTask class, an instance of this class contains all information needed to start a timed session of tracking
+ * TimeTask class, an instance of this class contains all information needed to start a timed
+ * session of tracking
  */
 public class TimeTask implements Serializable {
     //Elapsed time measurement
-    private long time;
-    //The max heart rate threshold, the average heart rate must be greater than this value in order for the alarm to go off.
+    private LocalTime time;
+    //The max heart rate threshold, the average heart rate must be greater than this value in
+    // order for the alarm to go off.
     private int maxHeartRate;
-    //Heart rate measurement type which decides how heart rate will be compared to the max, average over time vs. current heart rate
+    //Heart rate measurement type which decides how heart rate will be compared to the max,
+    // average over time vs. current heart rate
     private HeartRateMeasurementType hrMeasureType;
     //Amount of time to measure average, can be specified by the user
-    private long averageMeasurementTime;
+    private LocalTime averageMeasurementTime;
     //Specifies whether alarm is checking a clock time or an elapsed time
     private AlarmType alarmType;
 
     /**
-     * Default TimeTask Constructor, defaults to elapsed time, measures the average of the last minute in a 15 minute time block
+     * Default TimeTask Constructor, defaults to elapsed time, measures the average of the last
+     * minute in a 15 minute time block
      */
     public TimeTask() {
         //Defaults to elapsed time
         this.alarmType = AlarmType.ELAPSED_TIME;
-        //Safe threshold set at a default of 70, the average heart rate for a person sleeping is around 50-60 bpm
+        //Safe threshold set at a default of 70, the average heart rate for a person sleeping is
+        // around 50-60 bpm
         this.maxHeartRate = 70;
         //15 Minutes in milliseconds
-        this.time = 900000;
+        this.time = LocalTime.of(0,
+                15,
+                0);
         //Average is used for default
         this.hrMeasureType = HeartRateMeasurementType.AVERAGE;
         //1 Minute average measurement
-        this.averageMeasurementTime = 60000;
+        this.averageMeasurementTime = LocalTime.of(0,
+                1,
+                0);
     }
 
     /**
@@ -42,11 +53,18 @@ public class TimeTask implements Serializable {
      *
      * @param alarmType              Type of alarm, either elapsed time or clock time
      * @param averageMeasurementTime The length of time to measure the average heart rate
-     * @param time                   How long elapsed time should last or when the heart rate measurement should be checked at a specific clock time, both in milliseconds
-     * @param maxHeartRate           Sets the max heart rate threshold, if the heart rate measurement is above this value, the alarm will go off as the user is awake
-     * @param hrMeasureType          Type of heart rate measurement, either checks the average of the specified average measurement time, or checks the current heart rate when the time block is over
+     * @param time                   How long elapsed time should last or when the heart rate
+     *                               measurement should be checked at a specific clock time, both
+     *                               in milliseconds
+     * @param maxHeartRate           Sets the max heart rate threshold, if the heart rate
+     *                               measurement is above this value, the alarm will go off as
+     *                               the user is awake
+     * @param hrMeasureType          Type of heart rate measurement, either checks the average of
+     *                              the specified average measurement time, or checks the current
+     *                              heart rate when the time block is over
      */
-    public TimeTask(AlarmType alarmType, long averageMeasurementTime, long time, int maxHeartRate, HeartRateMeasurementType hrMeasureType) {
+    public TimeTask(AlarmType alarmType, LocalTime time, LocalTime averageMeasurementTime,
+                    int maxHeartRate, HeartRateMeasurementType hrMeasureType) {
         this.alarmType = alarmType;
         this.averageMeasurementTime = averageMeasurementTime;
         this.time = time;
@@ -54,20 +72,15 @@ public class TimeTask implements Serializable {
         this.hrMeasureType = hrMeasureType;
     }
 
-    public String convertMillisecondsToHourMinuteSecond(long time) {
-        long HH = TimeUnit.MILLISECONDS.toHours(time);
-        long MM = TimeUnit.MILLISECONDS.toMinutes(time) % 60;
-        long SS = TimeUnit.MILLISECONDS.toSeconds(time) % 60;
-        String formattedString = String.format("%02d:%02d:%02d", HH, MM, SS);
-
-        return formattedString;
+    public String convertToLocalISOTime(){
+        return LocalTime.parse(this.getTime().toString(), DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern("hh:mm a"));
     }
 
-    public void setTime(long time) {
+    public void setTime(LocalTime time) {
         this.time = time;
     }
 
-    public long getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
@@ -87,11 +100,11 @@ public class TimeTask implements Serializable {
         this.hrMeasureType = hrMeasureType;
     }
 
-    public long getAverageMeasurementTime() {
+    public LocalTime getAverageMeasurementTime() {
         return averageMeasurementTime;
     }
 
-    public void setAverageMeasurementTime(long averageMeasurementTime) {
+    public void setAverageMeasurementTime(LocalTime averageMeasurementTime) {
         this.averageMeasurementTime = averageMeasurementTime;
     }
 
@@ -105,13 +118,39 @@ public class TimeTask implements Serializable {
 
     public static ArrayList<TimeTask> createTimeTaskList(int numOfTimeTasks) {
         ArrayList<TimeTask> timeTasks = new ArrayList<TimeTask>();
-        for (int i = 1; i <= numOfTimeTasks; i++) {
-            if(i % 2 != 0){
-                timeTasks.add(new TimeTask(AlarmType.CLOCK_TIME, 60000, 0, 70, HeartRateMeasurementType.CURRENT ));
-            }
+        Random random = new Random();
 
-            else{
-                timeTasks.add(new TimeTask(AlarmType.ELAPSED_TIME, 60000, 900000, 70, HeartRateMeasurementType.AVERAGE ));
+        for (int i = 1; i <= numOfTimeTasks; i++) {
+            int randomHour = random.ints(0,
+                    23).findFirst().getAsInt();
+            int randomElapsedHour = random.ints(0,
+                    3).findFirst().getAsInt();
+            int randomMinute = random.ints(0,
+                    59).findFirst().getAsInt();
+            int randomMaxHR = random.ints(50,
+                    90).findFirst().getAsInt();
+            if (i % 2 != 0) {
+
+                timeTasks.add(new TimeTask(AlarmType.CLOCK_TIME,
+                        LocalTime.of(randomHour,
+                                randomMinute),
+                        LocalTime.of(0,
+                                0,
+                                0),
+                        randomMaxHR,
+                        HeartRateMeasurementType.CURRENT));
+            } else {
+                int randomMinuteForAverage = random.ints(0,
+                        randomMinute).findFirst().getAsInt();
+
+                timeTasks.add(new TimeTask(AlarmType.ELAPSED_TIME,
+                        LocalTime.of(randomElapsedHour,
+                                randomMinute),
+                        LocalTime.of(0,
+                                randomMinuteForAverage,
+                                0),
+                        randomMaxHR,
+                        HeartRateMeasurementType.AVERAGE));
 
             }
         }

@@ -1,6 +1,9 @@
 package com.cjrcodes.insomniapp.views;
 
 import android.content.Context;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.wear.widget.WearableRecyclerView;
 
 import com.cjrcodes.insomniapp.R;
+import com.cjrcodes.insomniapp.models.AlarmType;
+import com.cjrcodes.insomniapp.models.HeartRateMeasurementType;
 import com.cjrcodes.insomniapp.models.TimeTask;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHolder> {
 
@@ -67,7 +75,8 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
         // Set item views based on your views and data model
         TextView textView = holder.nameTextView;
         //timeTask.convertMillisecondsToHourMinuteSecond(timeTask.getTime()) + " " + timeTask.getMaxHeartRate()
-        textView.setText("Time Task Placeholder");
+        TimeTask tt = mTimeTasks.get(position);
+        textView.setText((tt.getAlarmType().equals(AlarmType.CLOCK_TIME) ? tt.convertToLocalISOTime() : tt.getTime()) + " Max HR: " + tt.getMaxHeartRate() + " " + (tt.getHrMeasureType().equals(HeartRateMeasurementType.AVERAGE) ? "AVG " + tt.getAverageMeasurementTime() : "CUR"));
         //Button button = holder.editButton;
     }
 
