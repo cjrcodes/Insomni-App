@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,6 +30,7 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
     // Store a member variable for the contacts
     private List<TimeTask> mTimeTasks = new ArrayList<TimeTask>();
     private Context mContext;
+    private int itemPosition;
 
     // Pass in the contact array into the constructor
     public TimeTaskAdapter(List<TimeTask> timeTasks) {
@@ -42,7 +44,7 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView nameTextView;
-        public Button editButton;
+       // public ImageButton createTimeTaskButton;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -51,7 +53,12 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
             // to access the context from any ViewHolder instance.
             super(itemView);
             nameTextView = (TextView) itemView.findViewById(R.id.button_time_task);
-            //editButton = (Button) itemView.findViewById(R.id.edit_button);
+
+            //createTimeTaskButton = (ImageButton) itemView.findViewById(R.id.button_create_time_task);
+        }
+
+        public int getItemPosition(){
+            return this.getAbsoluteAdapterPosition();
         }
     }
 
@@ -70,14 +77,24 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
     // Involves populating data into the item through holder
     @Override
     public void onBindViewHolder(TimeTaskAdapter.ViewHolder holder, int position) {
-        // Get the data model based on position
-        TimeTask timeTask = mTimeTasks.get(position);
-        // Set item views based on your views and data model
-        TextView textView = holder.nameTextView;
-        //timeTask.convertMillisecondsToHourMinuteSecond(timeTask.getTime()) + " " + timeTask.getMaxHeartRate()
-        TimeTask tt = mTimeTasks.get(position);
-        textView.setText((tt.getAlarmType().equals(AlarmType.CLOCK_TIME) ? tt.convertToLocalISOTime() : tt.getTime()) + " Max HR: " + tt.getMaxHeartRate() + " " + (tt.getHrMeasureType().equals(HeartRateMeasurementType.AVERAGE) ? "AVG " + tt.getAverageMeasurementTime() : "CUR"));
-        //Button button = holder.editButton;
+
+        if(position == 0){
+            //holder.createTimeTaskButton.setVisibility(View.VISIBLE);
+        }
+        else{
+            System.out.println(position);
+            //holder.createTimeTaskButton.setVisibility(View.GONE);
+            // Get the data model based on position
+            TimeTask timeTask = mTimeTasks.get(position);
+            // Set item views based on your views and data model
+            TextView textView = holder.nameTextView;
+            //timeTask.convertMillisecondsToHourMinuteSecond(timeTask.getTime()) + " " + timeTask.getMaxHeartRate()
+            TimeTask tt = mTimeTasks.get(position);
+            textView.setText((tt.getAlarmType().equals(AlarmType.CLOCK_TIME) ? tt.convertToLocalISOTime() : tt.getTime()) + " Max HR: " + tt.getMaxHeartRate() + " " + (tt.getHrMeasureType().equals(HeartRateMeasurementType.AVERAGE) ? "AVG " + tt.getAverageMeasurementTime() : "CUR"));
+            //Button button = holder.editButton;
+        }
+
+
     }
 
     // Returns the total count of items in the list
