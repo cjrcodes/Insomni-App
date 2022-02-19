@@ -11,15 +11,14 @@
     android:paddingBottom="10dp"
     app:layout_constraintEnd_toStartOf="parent">
 
-
-    <Button
-        android:id="@+id/button_time_task"
-        android:layout_width="213dp"
+    <ImageButton
+        android:id="@+id/image_button_create_time_task"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center|center_horizontal|center_vertical"
+        android:contentDescription="@string/contentDescAddTimeBlock"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_add_white_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

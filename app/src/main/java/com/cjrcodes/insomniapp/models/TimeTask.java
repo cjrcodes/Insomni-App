@@ -129,6 +129,8 @@ public class TimeTask implements Serializable {
                     59).findFirst().getAsInt();
             int randomMaxHR = random.ints(50,
                     90).findFirst().getAsInt();
+            int randomMinuteForAverage = random.ints(0,
+                    (randomMinute == 0 ? 1 : randomMinute)).findFirst().getAsInt();
             if (i % 2 != 0) {
 
                 timeTasks.add(new TimeTask(AlarmType.CLOCK_TIME,
@@ -140,8 +142,7 @@ public class TimeTask implements Serializable {
                         randomMaxHR,
                         HeartRateMeasurementType.CURRENT));
             } else {
-                int randomMinuteForAverage = random.ints(0,
-                        randomMinute).findFirst().getAsInt();
+
 
                 timeTasks.add(new TimeTask(AlarmType.ELAPSED_TIME,
                         LocalTime.of(randomElapsedHour,
