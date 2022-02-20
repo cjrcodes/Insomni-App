@@ -85,7 +85,7 @@ public class MainActivity extends WearableActivity {
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
 
-                return false;
+                return true;
             }
 
             @Override
