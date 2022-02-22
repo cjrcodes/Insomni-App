@@ -6,13 +6,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/placeholder_time_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="49dp"
         android:layout_marginTop="97dp"
         android:layout_marginEnd="50dp"
-        android:text="Time Task Activity"
+        android:text="@string/title_activity_time_task"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -40,11 +40,11 @@ public class TimeTask implements Serializable {
         this.time = LocalTime.of(0,
                 15,
                 0);
-        //Average is used for default
-        this.hrMeasureType = HeartRateMeasurementType.AVERAGE;
+        //Current is used for default
+        this.hrMeasureType = HeartRateMeasurementType.CURRENT;
         //1 Minute average measurement
         this.averageMeasurementTime = LocalTime.of(0,
-                1,
+                0,
                 0);
     }
 

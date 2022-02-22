@@ -4,15 +4,34 @@
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
+
     <string name="title_activity_main">MainActivity</string>
 
+    <!--Labels-->
+    <string name="label_alarm_type">Alarm Type</string>
+    <string name="label_time">Time</string>
+    <string name="label_hr_measurement">Heart Rate Measurement</string>
+
+    <!--Content Description-->
     <string name="contentDescAddTimeBlock">Add Time Block</string>
-    <string name="title_activity_create_time_task">CreateTimeTask</string>
+
+    <!--Time Task Information-->
+    <string name="time_task_information">%1$s Max HR: %2$d %3$s</string>
+
+    <!--Alarm Types-->
+    <string name="alarm_type_clock">Clock</string>
+    <string name="alarm_type_elapsed">Elapsed</string>
+
+    <!--HR Measurement Types-->
+    <string name="hr_measurement_type_average">Average</string>
+    <string name="hr_measurement_type_current">Current</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
-    <string name="hello_world">Hello Square World!</string>
-    <string name="title_activity_time_task">TimeTaskActivity</string>
+    <!--Placeholder-->
+    <string name="title_activity_time_task">Time Task Activity</string>
+    <string name="title_activity_create_time_task">CreateTimeTask</string>
+
 
 </resources>

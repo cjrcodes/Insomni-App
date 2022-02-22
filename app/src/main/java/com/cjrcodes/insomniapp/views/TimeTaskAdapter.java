@@ -1,10 +1,12 @@
 package com.cjrcodes.insomniapp.views;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.content.Context;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -15,8 +17,11 @@ import com.cjrcodes.insomniapp.models.AlarmType;
 import com.cjrcodes.insomniapp.models.HeartRateMeasurementType;
 import com.cjrcodes.insomniapp.models.TimeTask;
 
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
+
+import static androidx.core.content.res.TypedArrayUtils.getString;
 
 public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHolder> {
 
@@ -82,12 +87,18 @@ public class TimeTaskAdapter extends RecyclerView.Adapter<TimeTaskAdapter.ViewHo
         // .getMaxHeartRate()
         TimeTask tt = mTimeTasks.get(position);
 
+
         buttonView.setTag(position);
-        buttonView.setText(
+        buttonView.setText(mContext.getString(R.string.time_task_information,
+                (tt.getAlarmType().equals(AlarmType.CLOCK_TIME) ? tt.convertToLocalISOTime() : tt.getTime()),
+                tt.getMaxHeartRate(),
+                (tt.getHrMeasureType().equals(HeartRateMeasurementType.AVERAGE) ?
+                        ("AVG " + tt.getAverageMeasurementTime()) : "CUR")));
+        /*buttonView.setText(
                 (tt.getAlarmType().equals(AlarmType.CLOCK_TIME) ? tt.convertToLocalISOTime() :
                         tt.getTime()) + " Max HR: " + tt.getMaxHeartRate() + " " +
                         (tt.getHrMeasureType().equals(HeartRateMeasurementType.AVERAGE) ?
-                                "AVG " + tt.getAverageMeasurementTime() : "CUR"));
+                                "AVG " + tt.getAverageMeasurementTime() : "CUR"));*/
 
         //Button button = holder.editButton;
 
