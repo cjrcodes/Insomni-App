@@ -2,22 +2,55 @@
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext {
+// Dependency versions.
+        activity_compose_version = '1.4.0'
+        compose_version = '1.2.0-alpha04'
+        lifecycle_version = '2.4.0-rc01'
+        wear_compose_version = '1.0.0-alpha17'
+
+        junit_version = '4.13.2'
+        androidx_test_ext_junit_version = '1.1.3'
+        espresso_version = '3.4.0'
+        material_version = "1.6.0-alpha03"
+    }
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.3"
+        classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
-allprojects {
+plugins {
+    alias(libs.plugins.com.diffplug.spotless) apply(false)
+    alias(libs.plugins.com.android.application) apply(false)
+    id 'version-catalog'
+    id 'maven-publish'
+}
+
+subprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+    }
+
+    apply plugin: "com.diffplug.spotless"
+    apply plugin: 'com.android.application'
+    spotless {
+        kotlin {
+            target '**/*.kt'
+            targetExclude("$buildDir/**/*.kt")
+            targetExclude('bin/**/*.kt')
+
+            ktlint("0.41.0")
+            licenseHeaderFile rootProject.file('spotless/copyright.kt')
+        }
     }
 }
 

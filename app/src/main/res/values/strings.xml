@@ -11,16 +11,25 @@
     <string name="label_alarm_type">Alarm Type</string>
     <string name="label_time">Time</string>
     <string name="label_hr_measurement">Heart Rate Measurement</string>
+    <string name="label_max_hr">Max Heart Rate</string>
+
+    <string name="button_create_time_task">Create Time Task</string>
 
     <!--Content Description-->
     <string name="contentDescAddTimeBlock">Add Time Block</string>
+    <string name="contentDescAlarmType">Select Alarm Type</string>
+    <string name="contentDescTime">Select Time</string>
+    <string name="contentDescHRMeasurement">Select Heart Rate Measurement</string>
+    <string name="contentDescTimeTasksList"> Time Tasks List</string>
 
     <!--Time Task Information-->
     <string name="time_task_information">%1$s Max HR: %2$d %3$s</string>
-
+    <string name="time_task_time">%1$s</string>
+    <string name="time_task_max_heart_rate">%1$d</string>
     <!--Alarm Types-->
     <string name="alarm_type_clock">Clock</string>
     <string name="alarm_type_elapsed">Elapsed</string>
+
 
     <!--HR Measurement Types-->
     <string name="hr_measurement_type_average">Average</string>
@@ -32,6 +41,8 @@
     <!--Placeholder-->
     <string name="title_activity_time_task">Time Task Activity</string>
     <string name="title_activity_create_time_task">CreateTimeTask</string>
+    <string name="title_activity_compose_test">ComposeTest</string>
+    <string name="title_activity_components">Components</string>
 
 
 </resources>

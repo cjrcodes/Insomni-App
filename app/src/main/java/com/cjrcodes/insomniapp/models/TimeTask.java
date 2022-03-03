@@ -60,8 +60,8 @@ public class TimeTask implements Serializable {
      *                               measurement is above this value, the alarm will go off as
      *                               the user is awake
      * @param hrMeasureType          Type of heart rate measurement, either checks the average of
-     *                              the specified average measurement time, or checks the current
-     *                              heart rate when the time block is over
+     *                               the specified average measurement time, or checks the current
+     *                               heart rate when the time block is over
      */
     public TimeTask(AlarmType alarmType, LocalTime time, LocalTime averageMeasurementTime,
                     int maxHeartRate, HeartRateMeasurementType hrMeasureType) {
@@ -72,8 +72,10 @@ public class TimeTask implements Serializable {
         this.hrMeasureType = hrMeasureType;
     }
 
-    public String convertToLocalISOTime(){
-        return LocalTime.parse(this.getTime().toString(), DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern("hh:mm a"));
+    public String convertToLocalISOTime() {
+        return LocalTime.parse(this.getTime().toString(),
+                DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern("hh:mm " +
+                "a"));
     }
 
     public void setTime(LocalTime time) {
@@ -117,7 +119,7 @@ public class TimeTask implements Serializable {
     }
 
     public static ArrayList<TimeTask> createTimeTaskList(int numOfTimeTasks) {
-        ArrayList<TimeTask> timeTasks = new ArrayList<TimeTask>();
+        ArrayList<TimeTask> timeTasks = new ArrayList<>();
         Random random = new Random();
 
         for (int i = 1; i <= numOfTimeTasks; i++) {
@@ -142,7 +144,6 @@ public class TimeTask implements Serializable {
                         randomMaxHR,
                         HeartRateMeasurementType.CURRENT));
             } else {
-
 
                 timeTasks.add(new TimeTask(AlarmType.ELAPSED_TIME,
                         LocalTime.of(randomElapsedHour,

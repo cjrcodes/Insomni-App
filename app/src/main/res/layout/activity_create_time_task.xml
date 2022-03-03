@@ -5,7 +5,7 @@
     android:id="@+id/scroll_view_create_time_task"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="10dp">
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,14 +30,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="4dp"
-            android:text="@string/label_alarm_type" />
+            android:text="@string/label_alarm_type"
+            android:textColor="#00E5FF" />
 
         <Button
             android:id="@+id/button_alarm_type"
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/contentDescAlarmType" />
 
         <TextView
             android:id="@+id/text_time"
@@ -52,7 +54,8 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/contentDescTime" />
 
         <TextView
             android:id="@+id/text_hr_measurement"
@@ -67,7 +70,39 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/contentDescHRMeasurement" />
+
+        <TextView
+            android:id="@+id/text_hr_measurement2"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/label_max_hr" />
+
+        <Button
+            android:id="@+id/button_max_hr"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/contentDescHRMeasurement" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <Button
+            android:id="@+id/button_create_time_task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/button_create_time_task" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
 
     </LinearLayout>
 
