@@ -36,7 +36,7 @@ android {
     defaultConfig {
 
         applicationId "com.cjrcodes.insomniapp"
-        minSdkVersion 30
+        minSdkVersion 26
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
@@ -137,6 +137,8 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
     implementation "com.google.accompanist:accompanist-pager:0.24.3-alpha"
+    implementation "com.google.accompanist:accompanist-pager-indicators:0.24.3-alpha"
+
 
     implementation "com.github.aakarshrestha:compose-pager-snap-helper:0.4.1"
 

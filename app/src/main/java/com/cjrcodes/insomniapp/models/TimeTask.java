@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -73,8 +74,8 @@ public class TimeTask implements Serializable {
 
     public String convertToLocalISOTime() {
         return LocalTime.parse(this.getTime().toString(),
-                DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern("hh:mm " +
-                "a"));
+                DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern(
+                "hh:mm " + "a"));
     }
 
     public void setTime(LocalTime time) {
@@ -83,6 +84,10 @@ public class TimeTask implements Serializable {
 
     public LocalTime getTime() {
         return time;
+    }
+
+    public String getTimeBasedOnAlarmType() {
+        return this.getAlarmType() == AlarmType.CLOCK_TIME ? convertToLocalISOTime() : getTime().toString();
     }
 
     public int getMaxHeartRate() {
