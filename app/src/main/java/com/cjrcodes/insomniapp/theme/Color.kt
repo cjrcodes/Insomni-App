@@ -17,7 +17,7 @@ import androidx.wear.compose.material.Colors
         secondaryVariant = orange200,
         error = red400,
         onPrimary = Color.Black,
-        onSecondary = Color.Black,
-        onError = Color.Black
+        onSecondary = Color.White,
+        onError = Color.Red
     )
 

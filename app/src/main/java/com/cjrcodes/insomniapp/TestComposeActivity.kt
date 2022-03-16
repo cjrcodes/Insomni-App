@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.cjrcodes.insomniapp.core.CreateTimeTaskButton
@@ -24,6 +26,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 
 class TestComposeActivity : ComponentActivity() {
@@ -156,26 +159,35 @@ fun CreateTimeTaskScreen(
             modifier = Modifier.fillMaxSize(),
         )
         { page ->
-            PageItem(
-                page = page,
+            when (page) {
+                0 -> AlarmTypePage(Modifier, navigator)
+                else -> PageItem(Modifier)
+            }
+
+
+            /*PageItem(
+                page = 1,
                 modifier = Modifier
 
-            )
+            )*/
+
+
         }
 
         HorizontalPagerIndicator(
             pagerState = pagerState,
             modifier = Modifier
-                .fillMaxSize().wrapContentSize(align = Alignment.BottomCenter).padding(20.dp)
-                ,
-            activeColor = MaterialTheme.colors.onPrimary,
+                .fillMaxSize()
+                .wrapContentSize(align = Alignment.BottomCenter)
+                .padding(20.dp),
+            activeColor = White,
             inactiveColor = MaterialTheme.colors.secondary
         )
     }
 }
 //}
 
-/*
+
 @Preview(
     widthDp = WEAR_PREVIEW_DEVICE_WIDTH_DP,
     heightDp = WEAR_PREVIEW_DEVICE_HEIGHT_DP,
@@ -184,12 +196,9 @@ fun CreateTimeTaskScreen(
     backgroundColor = WEAR_PREVIEW_BACKGROUND_COLOR_BLACK,
     showBackground = WEAR_PREVIEW_SHOW_BACKGROUND
 )
-
 @Composable
 fun MainActivityPreview() {
     WearAppTheme {
-        //WearApp(EmptyDestinationsNavigator)
-        DestinationsNavHost(navGraph = NavGraphs.root)
-
+        WearApp(EmptyDestinationsNavigator)
     }
-}*/
+}

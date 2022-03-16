@@ -70,7 +70,7 @@ fun TimeTaskChip(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if(averageMeasurementTime != "") {
+            if (averageMeasurementTime != "") {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
@@ -86,12 +86,38 @@ fun TimeTaskChip(
     )
 }
 
+@Preview
+@Composable
+fun CreateTimeTaskButtonPreview() {
+    WearAppTheme {
+        CreateTimeTaskButton(Modifier) {}
+
+
+    }
+}
+
+val timeTasks: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
+
 
 @Preview
 @Composable
 fun TimeTaskChipPreview() {
     WearAppTheme {
-        TimeTaskChip(Modifier, TimeTask.createTimeTaskList(1).get(0)) {}
+        TimeTaskChip(Modifier, timeTasks[0]) {}
+
+
     }
 
 }
+
+@Preview
+@Composable
+fun TimeTaskAverageMeasurementChipPreview() {
+    WearAppTheme {
+        TimeTaskChip(Modifier, timeTasks[1]) {}
+
+
+    }
+
+}
+
