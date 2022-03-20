@@ -15,12 +15,16 @@ import androidx.wear.compose.material.*
 import com.cjrcodes.insomniapp.models.HeartRateMeasurementType
 import com.cjrcodes.insomniapp.models.TimeTask
 import com.cjrcodes.insomniapp.theme.WearAppTheme
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @Composable
 fun CreateTimeTaskButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
+    navigator: DestinationsNavigator,
+    onClick: () -> Unit,
+
+    ) {
     Row(
         modifier = Modifier,
         horizontalArrangement = Arrangement.Center
@@ -90,7 +94,7 @@ fun TimeTaskChip(
 @Composable
 fun CreateTimeTaskButtonPreview() {
     WearAppTheme {
-        CreateTimeTaskButton(Modifier) {}
+        CreateTimeTaskButton(Modifier, EmptyDestinationsNavigator) {}
 
 
     }
