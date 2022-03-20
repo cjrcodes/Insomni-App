@@ -52,8 +52,10 @@ internal fun PageItem(
 @ExperimentalWearMaterialApi
 internal fun AlarmTypePage(
     modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator
 ) {
+    val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
+    val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
+
     val swipeState = rememberSwipeToDismissBoxState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -119,7 +121,7 @@ internal fun AlarmTypePage(
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center,
 
-                                        text = "Selected Alarm Type",
+                                        text = alarmTypeOptions[pickerState.selectedOption],
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -132,7 +134,7 @@ internal fun AlarmTypePage(
                                         contentDescription = "Localized description"
                                     )
                                 },
-                                onClick = { showMainScreen = false}
+                                onClick = { showMainScreen = false }
                             )
                         }
                     }
@@ -140,12 +142,11 @@ internal fun AlarmTypePage(
             } else {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        ,
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    AlarmTypePickerPage(Modifier)
+                    AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions)
 
                 }
             }
@@ -156,25 +157,33 @@ internal fun AlarmTypePage(
 }
 
 @Composable
-fun AlarmTypePickerPage(modifier: Modifier = Modifier) {
-    val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
+fun AlarmTypePickerPage(
+    modifier: Modifier = Modifier,
+    pickerState: PickerState,
+    options: List<String>
+) {
     val coroutineScope = rememberCoroutineScope()
 
-    val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
 
     WearAppTheme {
         Picker(
             state = pickerState,
             modifier = Modifier,
-            separation = 5.dp,
-            ) {
+            separation = 25.dp,
+        ) {
             CompactChip(
+
                 onClick = {
                     coroutineScope.launch { pickerState.scrollToOption(it) }
                 },
 
                 label = {
-                    Text("")
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = options[it]
+                    )
                 }
             )
         }
@@ -194,7 +203,9 @@ fun AlarmTypePickerPage(modifier: Modifier = Modifier) {
 @Composable
 fun AlarmTypePickerPagePreview() {
     WearAppTheme {
-        AlarmTypePickerPage(Modifier)
+        val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
+        val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
+        AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions)
     }
 }
 
@@ -211,7 +222,7 @@ fun AlarmTypePickerPagePreview() {
 @Composable
 fun AlarmTypePagePreview() {
     WearAppTheme {
-        AlarmTypePage(Modifier, EmptyDestinationsNavigator)
+        AlarmTypePage(Modifier)
     }
 }
 
@@ -252,7 +263,8 @@ fun SwipeToDismiss(Modifier: Modifier) {
                     val checked = rememberSaveable { mutableStateOf(true) }
                     Column(
                         modifier = Modifier
-                            .fillMaxSize().padding(horizontal = 8.dp, vertical = 8.dp),
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
                         verticalArrangement =
                         Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
                     ) {
@@ -268,7 +280,9 @@ fun SwipeToDismiss(Modifier: Modifier) {
             )
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.primary),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colors.primary),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {

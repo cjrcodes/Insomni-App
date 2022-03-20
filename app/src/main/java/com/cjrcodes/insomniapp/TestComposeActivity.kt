@@ -4,12 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,7 +72,6 @@ fun WearApp(
                 )
             }
         ) {
-
             // Modifiers used by our Wear composables.
             val contentModifier = Modifier
                 .fillMaxWidth()
@@ -84,33 +82,78 @@ fun WearApp(
                 .wrapContentSize(align = Alignment.Center)
             /* *************************** Part 3: ScalingLazyColumn *************************** */
             var timeTasks: List<TimeTask> = createTimeTaskList(0);
-            val listState = rememberScalingLazyListState()
-            val coroutineScope = rememberCoroutineScope()
-            val scrollState = rememberScrollState()
-            var interceptScroll by remember { mutableStateOf(false) }
+            val swipeState = rememberSwipeToDismissBoxState()
+            var showMainScreen by remember { mutableStateOf(true) }
+            val saveableStateHolder = rememberSaveableStateHolder()
+            LaunchedEffect(swipeState.currentValue) {
+                if (swipeState.currentValue == SwipeDismissTarget.Dismissal) {
+                    swipeState.snapTo(SwipeDismissTarget.Original)
 
-            ScalingLazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(
-                    horizontal = 8.dp, vertical = 8.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                state = listState
-            ) {
-                item {
-                    CreateTimeTaskButton(Modifier) {
-                        navigator.navigate(
-                            CreateTimeTaskScreenDestination
-                        )
-                    }
-                }
-                items(timeTasks) { timeTask ->
-                    TimeTaskChip(Modifier, timeTask) {}
+                    showMainScreen = !showMainScreen
                 }
             }
+
+            SwipeToDismissBox(
+                modifier = Modifier.fillMaxSize(),/*,
+         contentAlignment = Alignment.Center*/
+                state = swipeState, hasBackground = !showMainScreen,
+                backgroundKey = if (!showMainScreen) "MainKey" else "Background",
+                contentKey = if (showMainScreen) "MainKey" else "ItemKey",
+            ) { isBackground ->
+                if (isBackground || showMainScreen) {
+                    // Best practice would be to use State Hoisting and leave this composable stateless.
+                    // Here, we want to support MainScreen being shown from different destinations
+                    // (either in the foreground or in the background during swiping) - that can be achieved
+                    // using SaveableStateHolder and rememberSaveable as shown below.
+                    saveableStateHolder.SaveableStateProvider(
+                        key = "MainKey",
+                        content = {
+                            // Composable that maintains its own state
+                            // and can be shown in foreground or background.
+                            MainMenuScreen(contentModifier, timeTasks, navigator) {
+                                showMainScreen = false
+                            }
+
+
+                        }
+                    )
+                } else {
+                    AlarmTypePage(contentModifier)
+                }
+
+            }
+
+
+        }
+    }
+}
+
+@Composable
+fun MainMenuScreen(modifier: Modifier, timeTasks: List<TimeTask>, navigator: DestinationsNavigator, onClick: (Boolean) -> Unit){
+    val listState = rememberScalingLazyListState()
+
+    ScalingLazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .fillMaxWidth(),
+        contentPadding = PaddingValues(
+            horizontal = 8.dp, vertical = 8.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        state = listState
+    ) {
+        item {
+            CreateTimeTaskButton(Modifier) {
+                navigator.navigate(
+                    CreateTimeTaskScreenDestination
+                )
+
+
+            }
+        }
+        items(timeTasks) { timeTask ->
+            TimeTaskChip(Modifier, timeTask) {}
         }
     }
 }
@@ -160,7 +203,7 @@ fun CreateTimeTaskScreen(
         )
         { page ->
             when (page) {
-                0 -> AlarmTypePage(Modifier, navigator)
+                0 -> AlarmTypePage(Modifier)
                 else -> PageItem(Modifier)
             }
 
