@@ -21,7 +21,6 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Composable
 fun CreateTimeTaskButton(
     modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator,
     onClick: () -> Unit,
 
     ) {
@@ -60,7 +59,7 @@ fun TimeTaskChip(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colors.onPrimary,
-                text = timeTask.getTimeBasedOnAlarmType(),
+                text = timeTask.timeBasedOnAlarmType,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -94,7 +93,7 @@ fun TimeTaskChip(
 @Composable
 fun CreateTimeTaskButtonPreview() {
     WearAppTheme {
-        CreateTimeTaskButton(Modifier, EmptyDestinationsNavigator) {}
+        CreateTimeTaskButton(Modifier) {}
 
 
     }
@@ -107,6 +106,7 @@ val timeTasks: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
 @Composable
 fun TimeTaskChipPreview() {
     WearAppTheme {
+        TimeTask.setIsTwelveHourFormat(true)
         TimeTaskChip(Modifier, timeTasks[0]) {}
 
 
@@ -118,9 +118,32 @@ fun TimeTaskChipPreview() {
 @Composable
 fun TimeTaskAverageMeasurementChipPreview() {
     WearAppTheme {
+        TimeTask.setIsTwelveHourFormat(true)
         TimeTaskChip(Modifier, timeTasks[1]) {}
 
 
+    }
+
+}
+
+val timeTasks24: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
+
+
+@Preview
+@Composable
+fun TimeTask24ChipPreview() {
+    WearAppTheme {
+        TimeTask.setIsTwelveHourFormat(false)
+        TimeTaskChip(Modifier, timeTasks24[0]) {}
+    }
+}
+
+@Preview
+@Composable
+fun TimeTask24AverageMeasurementChipPreview() {
+    WearAppTheme {
+        TimeTask.setIsTwelveHourFormat(false)
+        TimeTaskChip(Modifier, timeTasks24[1]) {}
     }
 
 }

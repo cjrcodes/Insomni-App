@@ -19,16 +19,21 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.wear.compose.material.*
+import com.chargemap.compose.numberpicker.NumberPicker
 import com.cjrcodes.insomniapp.core.TimeTaskChip
+import com.cjrcodes.insomniapp.destinations.CreateTimeTaskScreenDestination
 import com.cjrcodes.insomniapp.destinations.WearAppDestination
 import com.cjrcodes.insomniapp.theme.*
 import com.google.accompanist.pager.PagerState
+import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import kotlinx.coroutines.launch
@@ -54,7 +59,7 @@ internal fun PageItem(
 @ExperimentalWearMaterialApi
 internal fun AlarmTypePage(
     modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
     val pickerState = rememberPickerState(alarmTypeOptions.size, repeatItems = false)
@@ -64,14 +69,16 @@ internal fun AlarmTypePage(
     var showMainScreen by remember { mutableStateOf(true) }
     val saveableStateHolder = rememberSaveableStateHolder()
 
+
     LaunchedEffect(swipeState.currentValue) {
         if (swipeState.currentValue == SwipeDismissTarget.Dismissal) {
             swipeState.snapTo(SwipeDismissTarget.Original)
             showMainScreen = !showMainScreen
         }
+
+
     }
     WearAppTheme {
-
 
         SwipeToDismissBox(
             modifier = Modifier.fillMaxSize(),/*,
@@ -98,7 +105,12 @@ internal fun AlarmTypePage(
                         Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
                     ) {
 
-                        AlarmTypeDisplayPage(Modifier, alarmTypeOptions, pickerState, navigator) { showMainScreen = false }
+                        AlarmTypeDisplayPage(
+                            Modifier,
+                            alarmTypeOptions,
+                            pickerState,
+                            navigator
+                        ) { showMainScreen = false }
                     }
                 }
             } else {
@@ -108,7 +120,10 @@ internal fun AlarmTypePage(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions)
+                    AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions) {
+
+
+                    }
 
                 }
             }
@@ -119,7 +134,13 @@ internal fun AlarmTypePage(
 }
 
 @Composable
-fun AlarmTypeDisplayPage(modifier: Modifier, options: List<String>, pickerState : PickerState, navigator : DestinationsNavigator, onClick: () -> Unit ) {
+fun AlarmTypeDisplayPage(
+    modifier: Modifier,
+    options: List<String>,
+    pickerState: PickerState,
+    navigator: DestinationsNavigator,
+    onClick: () -> Unit
+) {
 
     WearAppTheme {
 
@@ -199,11 +220,14 @@ fun AlarmTypeDisplayPage(modifier: Modifier, options: List<String>, pickerState 
     }
 }
 
+@OptIn(ExperimentalWearMaterialApi::class)
+@Destination
 @Composable
 fun AlarmTypePickerPage(
     modifier: Modifier = Modifier,
     pickerState: PickerState,
-    options: List<String>
+    options: List<String>,
+    onClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -217,7 +241,12 @@ fun AlarmTypePickerPage(
             CompactChip(
 
                 onClick = {
-                    coroutineScope.launch { pickerState.scrollToOption(it) }
+                    coroutineScope.launch {
+                        pickerState.scrollToOption(it)
+
+                    }
+                    onClick
+
                 },
 
                 label = {
@@ -228,6 +257,39 @@ fun AlarmTypePickerPage(
                         text = options[it]
                     )
                 }
+            )
+        }
+    }
+
+}
+
+@Composable
+fun HeartRatePage(
+    modifier: Modifier = Modifier,
+) {
+    val minHeartRateValue = 40
+    val maxHeartRateValue = 100
+    val heartRateValuesMid = (maxHeartRateValue + minHeartRateValue) / 2
+    var pickerValue by remember { mutableStateOf(heartRateValuesMid) }
+
+
+    WearAppTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text("Max Heart Rate")
+            NumberPicker(
+                modifier,
+                value = pickerValue,
+                onValueChange = {
+                    pickerValue = it
+                },
+                dividersColor = WearAppColorPalette.primary,
+                range = minHeartRateValue..maxHeartRateValue,
+                textStyle = TextStyle(Color.White)
             )
         }
     }
@@ -248,7 +310,7 @@ fun AlarmTypePickerPagePreview() {
     WearAppTheme {
         val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
         val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
-        AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions)
+        AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions) {}
     }
 }
 
@@ -269,3 +331,18 @@ fun AlarmTypePagePreview() {
     }
 }
 
+@OptIn(ExperimentalWearMaterialApi::class)
+@Preview(
+    widthDp = WEAR_PREVIEW_DEVICE_WIDTH_DP,
+    heightDp = WEAR_PREVIEW_DEVICE_HEIGHT_DP,
+    apiLevel = WEAR_PREVIEW_API_LEVEL,
+    uiMode = WEAR_PREVIEW_UI_MODE,
+    backgroundColor = WEAR_PREVIEW_BACKGROUND_COLOR_BLACK,
+    showBackground = WEAR_PREVIEW_SHOW_BACKGROUND
+)
+@Composable
+fun HeartRatePagePreview() {
+    WearAppTheme {
+        HeartRatePage(Modifier)
+    }
+}

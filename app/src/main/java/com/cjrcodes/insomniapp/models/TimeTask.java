@@ -1,6 +1,9 @@
 package com.cjrcodes.insomniapp.models;
 
+import android.content.Context;
+
 import java.io.Serializable;
+import java.time.Clock;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,7 +16,10 @@ import java.util.Random;
  * session of tracking
  */
 public class TimeTask implements Serializable {
-    //Elapsed time measurement
+    //Determines if time tasks will display in 12 or 24 hour format
+    private static Boolean isTwelveHourFormat;
+
+    //Elapsed or clock time measurement
     private LocalTime time;
     //The max heart rate threshold, the average heart rate must be greater than this value in
     // order for the alarm to go off.
@@ -73,6 +79,7 @@ public class TimeTask implements Serializable {
     }
 
     public String convertToLocalISOTime() {
+
         return LocalTime.parse(this.getTime().toString(),
                 DateTimeFormatter.ofPattern("HH:mm")).format(DateTimeFormatter.ofPattern(
                 "hh:mm " + "a"));
@@ -87,7 +94,8 @@ public class TimeTask implements Serializable {
     }
 
     public String getTimeBasedOnAlarmType() {
-        return this.getAlarmType() == AlarmType.CLOCK_TIME ? convertToLocalISOTime() : getTime().toString();
+        return this.getAlarmType() == AlarmType.CLOCK_TIME ? ((isTwelveHourFormat) ? convertToLocalISOTime() : getTime().toString()) :
+                getTime().toString() + ((isTwelveHourFormat) ?  "" : (" (Elapsed)"));
     }
 
     public int getMaxHeartRate() {
@@ -120,6 +128,14 @@ public class TimeTask implements Serializable {
 
     public void setAlarmType(AlarmType alarmType) {
         this.alarmType = alarmType;
+    }
+
+    public static Boolean getIsTwelveHourFormat() {
+        return isTwelveHourFormat;
+    }
+
+    public static void setIsTwelveHourFormat(Boolean twelveHourFormat) {
+        TimeTask.isTwelveHourFormat = twelveHourFormat;
     }
 
     public static ArrayList<TimeTask> createTimeTaskList(int numOfTimeTasks) {

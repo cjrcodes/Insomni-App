@@ -1,6 +1,7 @@
 package com.cjrcodes.insomniapp
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -29,8 +30,11 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 
 class TestComposeActivity : ComponentActivity() {
+    @OptIn(ExperimentalWearMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        TimeTask.setIsTwelveHourFormat(!DateFormat.is24HourFormat(applicationContext))
 
         setContent {
             WearAppTheme {
@@ -81,7 +85,7 @@ fun WearApp(
                 .size(24.dp)
                 .wrapContentSize(align = Alignment.Center)
             /* *************************** Part 3: ScalingLazyColumn *************************** */
-            var timeTasks: List<TimeTask> = createTimeTaskList(0);
+            var timeTasks: List<TimeTask> = createTimeTaskList(5);
 
             MainMenuScreen(contentModifier, timeTasks, navigator)
 
@@ -113,7 +117,7 @@ fun MainMenuScreen(
         state = listState
     ) {
         item {
-            CreateTimeTaskButton(Modifier, navigator) {
+            CreateTimeTaskButton(Modifier) {
                 navigator.navigate(
                     CreateTimeTaskScreenDestination
                 )
@@ -133,7 +137,6 @@ fun MainMenuScreen(
 @Composable
 fun CreateTimeTaskScreen(
     navigator: DestinationsNavigator,
-
     ) {
     val listState = rememberScalingLazyListState()
 
@@ -174,6 +177,7 @@ fun CreateTimeTaskScreen(
 
             when (page) {
                 0 -> AlarmTypePage(Modifier, navigator)
+                1 -> HeartRatePage(Modifier)
                 else -> PageItem(Modifier)
             }
 
