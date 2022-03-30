@@ -141,10 +141,9 @@ dependencies {
 
     implementation "com.google.accompanist:accompanist-pager:0.24.3-alpha"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.24.3-alpha"
-    implementation "com.chargemap.compose:numberpicker:$numberpicker_version"
+    //implementation "com.chargemap.compose:numberpicker:$numberpicker_version"
+    implementation "com.github.cjrcodes:Compose-NumberPicker:0.0.13"
 
-
-    implementation "com.github.aakarshrestha:compose-pager-snap-helper:0.4.1"
 
     implementation "androidx.navigation:navigation-compose:$nav_version"
 

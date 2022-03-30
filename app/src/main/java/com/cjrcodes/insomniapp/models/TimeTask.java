@@ -50,7 +50,6 @@ public class TimeTask implements Serializable {
         this.hrMeasureType = HeartRateMeasurementType.CURRENT;
         //1 Minute average measurement
         this.averageMeasurementTime = LocalTime.of(0,
-                0,
                 0);
     }
 
@@ -94,8 +93,9 @@ public class TimeTask implements Serializable {
     }
 
     public String getTimeBasedOnAlarmType() {
-        return this.getAlarmType() == AlarmType.CLOCK_TIME ? ((isTwelveHourFormat) ? convertToLocalISOTime() : getTime().toString()) :
-                getTime().toString() + ((isTwelveHourFormat) ?  "" : (" (Elapsed)"));
+        return this.getAlarmType() == AlarmType.CLOCK_TIME ?
+                ((isTwelveHourFormat) ? convertToLocalISOTime() : getTime().toString()) :
+                getTime().toString() + ((isTwelveHourFormat) ? "" : (" (Elapsed)"));
     }
 
     public int getMaxHeartRate() {
