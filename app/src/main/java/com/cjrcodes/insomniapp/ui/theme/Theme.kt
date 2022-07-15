@@ -1,4 +1,4 @@
-package com.cjrcodes.insomniapp.theme
+package com.cjrcodes.insomniapp.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme

@@ -1,5 +1,6 @@
 package com.cjrcodes.insomniapp.core
 
+import android.text.format.DateFormat.format
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,14 +13,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.*
-import com.cjrcodes.insomniapp.models.HeartRateMeasurementType
-import com.cjrcodes.insomniapp.models.TimeTask
-import com.cjrcodes.insomniapp.theme.WearAppTheme
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import com.cjrcodes.insomniapp.domain.models.Alarm.Alarm
+import com.cjrcodes.insomniapp.ui.theme.WearAppTheme
+import java.time.LocalTime
 
 @Composable
-fun CreateTimeTaskButton(
+fun CreateAlarmButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 
@@ -43,14 +42,12 @@ fun CreateTimeTaskButton(
 }
 
 @Composable
-fun TimeTaskChip(
+fun AlarmChip(
     modifier: Modifier = Modifier,
-    timeTask: TimeTask,
-    onClick: (TimeTask) -> Unit
+    alarm: Alarm,
+    onClick: (Alarm) -> Unit
 ) {
-    val averageMeasurementTime: String
-    averageMeasurementTime =
-        if (timeTask.hrMeasureType == HeartRateMeasurementType.AVERAGE) "Measure For: ${timeTask.averageMeasurementTime}" else ""
+    //val averageMeasurementTime: String = if (timeTask.hrMeasureType == HeartRateMeasurementType.AVERAGE) "Measure For: ${timeTask.averageMeasurementTime}" else ""
     Chip(
         modifier = modifier,
         enabled = true,
@@ -59,7 +56,7 @@ fun TimeTaskChip(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colors.onPrimary,
-                text = timeTask.timeBasedOnAlarmType,
+                text = "${alarm.time}",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -69,20 +66,10 @@ fun TimeTaskChip(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colors.onPrimary,
-                text = "Max HR: ${timeTask.maxHeartRate}",
+                text = "Max HR: ${alarm.maxHeartRate}",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (averageMeasurementTime != "") {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colors.onPrimary,
-                    text = averageMeasurementTime,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
         },
         onClick = { }
 
@@ -91,60 +78,37 @@ fun TimeTaskChip(
 
 @Preview
 @Composable
-fun CreateTimeTaskButtonPreview() {
+fun CreateAlarmButtonPreview() {
     WearAppTheme {
-        CreateTimeTaskButton(Modifier) {}
+        CreateAlarmButton(Modifier) {}
 
 
     }
 }
-
-val timeTasks: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
 
 
 @Preview
 @Composable
-fun TimeTaskChipPreview() {
+fun AlarmChipPreview() {
     WearAppTheme {
-        TimeTask.setIsTwelveHourFormat(true)
-        TimeTaskChip(Modifier, timeTasks[0]) {}
+        AlarmChip(Modifier, Alarm()) {}
 
 
     }
 
 }
 
-@Preview
-@Composable
-fun TimeTaskAverageMeasurementChipPreview() {
-    WearAppTheme {
-        TimeTask.setIsTwelveHourFormat(true)
-        TimeTaskChip(Modifier, timeTasks[1]) {}
 
 
-    }
-
-}
-
-val timeTasks24: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
 
 
 @Preview
 @Composable
-fun TimeTask24ChipPreview() {
+fun Alarm24ChipPreview() {
     WearAppTheme {
-        TimeTask.setIsTwelveHourFormat(false)
-        TimeTaskChip(Modifier, timeTasks24[0]) {}
+        AlarmChip(Modifier, Alarm()) {}
     }
 }
 
-@Preview
-@Composable
-fun TimeTask24AverageMeasurementChipPreview() {
-    WearAppTheme {
-        TimeTask.setIsTwelveHourFormat(false)
-        TimeTaskChip(Modifier, timeTasks24[1]) {}
-    }
 
-}
 

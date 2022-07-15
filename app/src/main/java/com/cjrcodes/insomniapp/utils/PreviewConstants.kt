@@ -1,4 +1,4 @@
-package com.cjrcodes.insomniapp.theme
+package com.cjrcodes.insomniapp.ui.theme
 
 import android.content.res.Configuration
 

@@ -1,4 +1,4 @@
-package com.cjrcodes.insomniapp.theme
+package com.cjrcodes.insomniapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.Colors

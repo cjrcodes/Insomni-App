@@ -1,15 +1,13 @@
 package com.cjrcodes.insomniapp
 
+//import com.cjrcodes.insomniapp.models.TimeTask.createTimeTaskList
 import android.os.Bundle
-import android.text.format.DateFormat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -19,18 +17,16 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.chargemap.compose.numberpicker.FullHours
-import com.chargemap.compose.numberpicker.Hours
-import com.cjrcodes.insomniapp.core.CreateTimeTaskButton
-import com.cjrcodes.insomniapp.core.TimeTaskChip
+import com.cjrcodes.insomniapp.core.AlarmChip
+import com.cjrcodes.insomniapp.core.CreateAlarmButton
 import com.cjrcodes.insomniapp.destinations.CreateTimeTaskScreenDestination
-import com.cjrcodes.insomniapp.models.TimeTask
-import com.cjrcodes.insomniapp.models.TimeTask.createTimeTaskList
-import com.cjrcodes.insomniapp.theme.*
+import com.cjrcodes.insomniapp.domain.models.Alarm.Alarm
+import com.cjrcodes.insomniapp.ui.theme.*
+import com.cjrcodes.insomniapp.utils.Config
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
@@ -38,17 +34,19 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.time.LocalTime
+import kotlin.math.ceil
 
 
-class TestComposeActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+
     @OptIn(ExperimentalWearMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        TimeTask.setIsTwelveHourFormat(!DateFormat.is24HourFormat(applicationContext))
-
+        Config.setTwelveHourFormat(applicationContext)
         setContent {
             WearAppTheme {
                 DestinationsNavHost(navGraph = NavGraphs.root)
@@ -69,7 +67,6 @@ fun WearApp(
     WearAppTheme {
 
         val listState = rememberScalingLazyListState()
-        val focusRequester = remember { FocusRequester() }
 
         /* *************************** Part 4: Wear OS Scaffold *************************** */
         Scaffold(
@@ -85,6 +82,7 @@ fun WearApp(
             },
             positionIndicator = {
                 PositionIndicator(
+
                     scalingLazyListState = listState
                 )
             }
@@ -98,9 +96,9 @@ fun WearApp(
                 .size(24.dp)
                 .wrapContentSize(align = Alignment.Center)
             /* *************************** Part 3: ScalingLazyColumn *************************** */
-            var timeTasks: List<TimeTask> = createTimeTaskList(5);
+            val alarms: List<Alarm> = emptyList()
 
-            MainMenuScreen(contentModifier, timeTasks, navigator)
+            MainMenuScreen(contentModifier, alarms, navigator, listState)
 
 
         }
@@ -113,10 +111,10 @@ fun WearApp(
 @Composable
 fun MainMenuScreen(
     modifier: Modifier,
-    timeTasks: List<TimeTask>,
-    navigator: DestinationsNavigator
+    alarms: List<Alarm>,
+    navigator: DestinationsNavigator,
+    listState: ScalingLazyListState
 ) {
-    val listState = rememberScalingLazyListState()
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -127,12 +125,14 @@ fun MainMenuScreen(
     ScalingLazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .fillMaxWidth().onRotaryScrollEvent {
+            .fillMaxWidth()
+            .onRotaryScrollEvent {
                 coroutineScope.launch {
                     listState.scrollBy(it.verticalScrollPixels)
                 }
                 true
             }
+
             .focusRequester(focusRequester)
             .focusable(),
         contentPadding = PaddingValues(
@@ -143,7 +143,7 @@ fun MainMenuScreen(
         state = listState
     ) {
         item {
-            CreateTimeTaskButton(Modifier) {
+            CreateAlarmButton(Modifier) {
                 navigator.navigate(
                     CreateTimeTaskScreenDestination
                 )
@@ -151,21 +151,22 @@ fun MainMenuScreen(
 
             }
         }
-        items(timeTasks) { timeTask ->
-            TimeTaskChip(Modifier, timeTask) {}
+        items(alarms) { timeTask ->
+            AlarmChip(Modifier, timeTask) {}
         }
     }
 }
 
 
-@OptIn(ExperimentalWearMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
+@OptIn(
+    ExperimentalWearMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
     androidx.compose.ui.ExperimentalComposeUiApi::class
 )
 @Destination
 @Composable
 fun CreateTimeTaskScreen(
     navigator: DestinationsNavigator,
-    ) {
+) {
     val listState = rememberScalingLazyListState()
 
     /* *************************** Part 4: Wear OS Scaffold *************************** */
@@ -193,44 +194,70 @@ fun CreateTimeTaskScreen(
         //Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         val pagerState = rememberPagerState()
         val alarmTypePickerState = rememberPickerState(2, repeatItems = false)
-        val timePickerState = remember { mutableStateOf<Hours>(FullHours(0, 0)) }
+        val timeState: MutableState<FullHours> =
+            remember { mutableStateOf<FullHours>(FullHours(0, 0)) }
+
         val heartRateState: MutableState<Int> = remember { mutableStateOf(70) }
-        val heartRateMeasurementTypePickerState = rememberPickerState(2, repeatItems = false)
-        val averageMeasurementTimeState: MutableState<LocalTime> = remember { mutableStateOf(LocalTime.MIN) }
-        val timeTaskState: MutableState<TimeTask> = remember { mutableStateOf(TimeTask()) }
+
+        //val timeTaskState = remember { mutableStateOf(TimeTask()) }
         val coroutineScope = rememberCoroutineScope()
         val focusRequester = remember { FocusRequester() }
         val configuration = LocalConfiguration.current
 
-        val screenHeight = configuration.screenHeightDp.dp
-        val screenWidth = configuration.screenWidthDp.dp
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
         }
 
 // Display 10 items
+        var currentPage = 0
         HorizontalPager(
 
             count = 4,
             state = pagerState,
             // Add 32.dp horizontal padding to 'center' the pages
-            modifier = Modifier.fillMaxSize().onRotaryScrollEvent {
-                coroutineScope.launch {
-                        pagerState.scrollBy(it.verticalScrollPixels)
+            modifier = Modifier
+                .fillMaxSize()
+                .onRotaryScrollEvent {
 
+                    coroutineScope.launch {
+                        val screenDensity = configuration.densityDpi / 160f
+                        val screenWidth =
+                            (ceil(configuration.screenWidthDp.toFloat() * screenDensity)).toInt()
+                        /*println("Hor " + it.horizontalScrollPixels)
+                        println("Screen $screenWidth")
+                        println("SD $screenDensity")*/
+
+                        val scrollValue =
+                            /**
+                             * TODO: Remove hard coding of 450 value and replace it with a screenWidth var/val that does not cause crash
+                             */
+                            if (it.horizontalScrollPixels < 0) (-(it.horizontalScrollPixels / it.horizontalScrollPixels) * 450) else (it.horizontalScrollPixels / it.horizontalScrollPixels) * 450
+                        pagerState.animateScrollBy(scrollValue)
+                    }
+                    true
                 }
-                true
-            }
                 .focusRequester(focusRequester)
                 .focusable()
+
         )
         { page ->
 
             when (page) {
-                0 -> AlarmTypePage(Modifier, navigator, alarmTypePickerState, timeTaskState)
-                1 -> TimeSelectPage(Modifier, alarmTypePickerState, timePickerState )
+                0 -> AlarmTypePage(Modifier, navigator, alarmTypePickerState)
+                1 -> TimeSelectPage(
+                    Modifier,
+                    alarmTypePickerState,
+                    timeState
+                )
                 2 -> HeartRatePage(Modifier, heartRateState)
-                3 -> HeartRateMeasurementTypePage(Modifier, navigator, heartRateMeasurementTypePickerState, averageMeasurementTimeState, timePickerState)
+                3 -> TimeTaskDetailsPage(
+                    Modifier,
+                    navigator,
+
+                    timeState,
+                    heartRateState
+
+                )
                 else -> PageItem(Modifier)
             }
 
@@ -273,8 +300,6 @@ fun MainActivityPreview() {
     }
 }
 
-
-/*
 @Preview(
     widthDp = WEAR_PREVIEW_DEVICE_WIDTH_DP,
     heightDp = WEAR_PREVIEW_DEVICE_HEIGHT_DP,
@@ -284,31 +309,8 @@ fun MainActivityPreview() {
     showBackground = WEAR_PREVIEW_SHOW_BACKGROUND
 )
 @Composable
-fun ScrollingExample() {
-
-    val listState = rememberScalingLazyListState()
-
-    ScalingLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .fillMaxWidth().rotaryEventHandler(listState),
-        contentPadding = PaddingValues(
-            horizontal = 8.dp, vertical = 8.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        state = listState
-    ) {
-        item {
-            CreateTimeTaskButton(Modifier) {
-                    EmptyDestinationsNavigator
-            }
-        }
-
-        val timeTasks24: ArrayList<TimeTask> = TimeTask.createTimeTaskList(2)
-
-        items(timeTasks24) { timeTask ->
-            TimeTaskChip(Modifier, timeTask) {}
-        }
+fun CreateTimeTaskScreenPreview() {
+    WearAppTheme {
+        CreateTimeTaskScreen(EmptyDestinationsNavigator)
     }
-}*/
+}

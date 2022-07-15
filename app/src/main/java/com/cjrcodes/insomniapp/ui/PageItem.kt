@@ -1,7 +1,7 @@
 package com.cjrcodes.insomniapp
 
+import android.content.ContentProvider
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.MoreTime
@@ -18,15 +18,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import com.chargemap.compose.numberpicker.*
-
+//import com.cjrcodes.insomniapp.core.vibrateDevice
 import com.cjrcodes.insomniapp.destinations.WearAppDestination
-import com.cjrcodes.insomniapp.models.TimeTask
-import com.cjrcodes.insomniapp.theme.*
+import com.cjrcodes.insomniapp.domain.models.Alarm.AlarmType
+import com.cjrcodes.insomniapp.domain.models.Alarm.Alarm
+import com.cjrcodes.insomniapp.ui.theme.*
+import com.cjrcodes.insomniapp.utils.Config
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+
 
 /**
  * Simple pager item which displays an image
@@ -51,9 +55,8 @@ internal fun AlarmTypePage(
     modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     pickerState: PickerState,
-    timeTaskState: MutableState<TimeTask>
 ) {
-    val alarmTypeOptions = arrayListOf<String>("Elapsed Timer","Clock Time")
+    val alarmTypeOptions = arrayListOf<String>("Elapsed Timer", "Clock Time")
     val swipeState = rememberSwipeToDismissBoxState()
 
     // Alternatively, use SwipeDismissableNavHost from wear.compose.navigation.
@@ -111,8 +114,9 @@ internal fun AlarmTypePage(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions) {
+                    AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions, alarmState, ) {
                         showMainScreen = true
+
                     }
 
                 }
@@ -201,7 +205,7 @@ fun AlarmTypeDisplayPage(
                 icon = {
                     Icon(
                         Icons.Filled.ArrowForwardIos,
-                        contentDescription = "Return To Main Menu Button"
+                        contentDescription = "Select Alarm Type"
                     )
                 },
                 onClick = onClick
@@ -210,13 +214,14 @@ fun AlarmTypeDisplayPage(
     }
 }
 
-@OptIn(ExperimentalWearMaterialApi::class)
+@OptIn(ExperimentalWearMaterialApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Destination
 @Composable
 fun AlarmTypePickerPage(
     modifier: Modifier = Modifier,
     pickerState: PickerState,
     options: List<String>,
+    alarmState: MutableState<Alarm>,
     onClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -233,6 +238,8 @@ fun AlarmTypePickerPage(
                 onClick = {
                     coroutineScope.launch {
                         pickerState.scrollToOption(it)
+                        alarmState.value.alarmType = if (pickerState.selectedOption == 1) AlarmType.CLOCK_TIME else AlarmType.ELAPSED_TIME
+                        println(alarmState.value.alarmType)
                         onClick()
                     }
 
@@ -249,6 +256,7 @@ fun AlarmTypePickerPage(
                 }
             )
         }
+
     }
 
 }
@@ -257,8 +265,10 @@ fun AlarmTypePickerPage(
 fun TimeSelectPage(
     modifier: Modifier = Modifier,
     alarmTypePickerState: PickerState,
-    timePickerState: MutableState<Hours>
+    alarmState: MutableState<Alarm>,
+    fullHoursPickerState: MutableState<FullHours>
 ) {
+
 
     WearAppTheme {
         //Clock time Selected, display clock version of time
@@ -274,25 +284,7 @@ fun TimeSelectPage(
 
             if (alarmTypePickerState.selectedOption == 0) {
                 Text("Timer Length")
-
-                var pickerValue by remember { mutableStateOf<Hours>(FullHours(0, 15)) }
-
-                HoursNumberPicker(
-                    leadingZero = true,
-                    dividersColor = WearAppColorPalette.primary,
-                    value = pickerValue,
-                    onValueChange = {
-                        pickerValue = it
-                    },
-                    hoursDivider = {
-                        Text(
-                            modifier = Modifier.size(24.dp),
-                            textAlign = TextAlign.Center,
-                            text = ":"
-                        )
-                    }, textStyle = TextStyle(Color.White)
-
-                )
+                TimeSelect24HourView(modifier, alarmState)
 
 
             }
@@ -302,17 +294,14 @@ fun TimeSelectPage(
 
                 Text("Select Time")
 
-                if (TimeTask.getIsTwelveHourFormat() == true) {
+                if (Config.getTwelveHourFormat()) {
 
-                    val timePickerState =
-                        remember { mutableStateOf<Hours>(AMPMHours(12, 0, AMPMHours.DayTime.AM)) }
-                    TimeSelect12HourView(modifier, timePickerState)
-
+                    TimeSelect12HourView(modifier, alarmState)
 
                 } else {
 
 
-                    TimeSelect24HourView(modifier, timePickerState)
+                    TimeSelect24HourView(modifier, alarmState)
 
 
                 }
@@ -323,10 +312,10 @@ fun TimeSelectPage(
 }
 
 @Composable
-fun TimeSelect12HourView(modifier: Modifier = Modifier, timePickerState: MutableState<Hours>) {
+fun TimeSelect12HourView(modifier: Modifier = Modifier, alarmState: MutableState<Alarm>) {
 
     var pickerValue by remember {
-        mutableStateOf<Hours>(
+        mutableStateOf<AMPMHours>(
             AMPMHours(
                 12,
                 0,
@@ -334,13 +323,21 @@ fun TimeSelect12HourView(modifier: Modifier = Modifier, timePickerState: Mutable
             )
         )
     }
-    HoursNumberPicker(
-        leadingZero = true,
 
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm a")
+
+    AMPMHoursNumberPicker(
+        leadingZero = true,
         dividersColor = WearAppColorPalette.primary,
         value = pickerValue,
         onValueChange = {
-            pickerValue = it
+            pickerValue = it as AMPMHours
+            val leadingZeroText = { i: Int -> if (i < 10) "0" else "" }
+            alarmState.value.time =
+                LocalTime.parse(
+                    "${leadingZeroText(it.hours)}${it.hours}:${leadingZeroText(it.minutes)}${it.minutes} ${it.dayTime}",
+                    formatter
+                )
         },
         hoursDivider = {
             Text(
@@ -360,18 +357,21 @@ fun TimeSelect12HourView(modifier: Modifier = Modifier, timePickerState: Mutable
 
             )
         },
-        textStyle = TextStyle(Color.White)
-
+        textStyle = TextStyle(Color.White),
+        hoursRange = 1..12
     )
 
-    timePickerState.value = pickerValue
+    println("Time:" + alarmState.value.time)
 }
 
 @Composable
-fun TimeSelect24HourView(modifier: Modifier = Modifier, timePickerState: MutableState<Hours>) {
+fun TimeSelect24HourView(
+    modifier: Modifier = Modifier, alarmState: MutableState<Alarm>
+) {
 
     var pickerValue by remember { mutableStateOf<Hours>(FullHours(0, 0)) }
 
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     HoursNumberPicker(
         leadingZero = true,
@@ -379,6 +379,12 @@ fun TimeSelect24HourView(modifier: Modifier = Modifier, timePickerState: Mutable
         value = pickerValue,
         onValueChange = {
             pickerValue = it
+            val leadingZeroText = { i: Int -> if (i < 10) "0" else "" }
+            alarmState.value.time =
+                LocalTime.parse(
+                    "${leadingZeroText(it.hours)}${it.hours}:${leadingZeroText(it.minutes)}${it.minutes}",
+                    formatter
+                )
         },
         hoursDivider = {
             Text(
@@ -393,20 +399,21 @@ fun TimeSelect24HourView(modifier: Modifier = Modifier, timePickerState: Mutable
 
     )
 
-    timePickerState.value = pickerValue
+    println(alarmState.value.time)
+    //timeTaskState.value.time = LocalTime.parse(pickerValue.hours.toString())
 
 }
 
 @Composable
 fun HeartRatePage(
     modifier: Modifier = Modifier,
+    alarmState: MutableState<Alarm>,
     heartRateState: MutableState<Int>
 ) {
     val minHeartRateValue = 40
     val maxHeartRateValue = 100
     val heartRateValuesMid = (maxHeartRateValue + minHeartRateValue) / 2
     var pickerValue by remember { mutableStateOf(heartRateValuesMid) }
-    heartRateState.value = pickerValue
     WearAppTheme {
         Column(
             modifier = Modifier
@@ -422,121 +429,32 @@ fun HeartRatePage(
                 value = pickerValue,
                 onValueChange = {
                     pickerValue = it
+                    heartRateState.value = it
+                    alarmState.value.maxHeartRate = pickerValue
                 },
                 dividersColor = WearAppColorPalette.primary,
                 range = minHeartRateValue..maxHeartRateValue,
                 textStyle = TextStyle(Color.White)
             )
         }
+        //timeTaskState.value.maxHeartRate = pickerValue
+        println("HR:" + alarmState.value.maxHeartRate)
     }
 
 }
 
-@OptIn(ExperimentalWearMaterialApi::class)
-@Composable
-fun HeartRateMeasurementTypePage(
-    modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator,
-    pickerState: PickerState,
-    averageMeasurementTimeState: MutableState<LocalTime>,
-    timePickerState: MutableState<Hours>
-) {
-    val heartRateMeasurementTypeOptions = arrayListOf<String>("Current", "Average Over Time")
-    val swipeState = rememberSwipeToDismissBoxState()
-
-    // Alternatively, use SwipeDismissableNavHost from wear.compose.navigation.
-    var showMainScreen by remember { mutableStateOf(true) }
-    val saveableStateHolder = rememberSaveableStateHolder()
-
-    val hrMeasurementTypeChipSelectState: MutableState<Int> = remember { mutableStateOf(0) }
-
-    LaunchedEffect(swipeState.currentValue) {
-        if (swipeState.currentValue == SwipeDismissTarget.Dismissal) {
-            swipeState.snapTo(SwipeDismissTarget.Original)
-            showMainScreen = !showMainScreen
-        }
-    }
-
-    WearAppTheme {
-
-        SwipeToDismissBox(
-            modifier = Modifier.fillMaxSize(),/*,
-         contentAlignment = Alignment.Center*/
-            state = swipeState, hasBackground = !showMainScreen,
-            backgroundKey = if (!showMainScreen) "MainKey" else "Background",
-            contentKey = if (showMainScreen) "MainKey" else "ItemKey",
-        ) { isBackground ->
-            if (isBackground || showMainScreen) {
-                // Best practice would be to use State Hoisting and leave this composable stateless.
-                // Here, we want to support MainScreen being shown from different destinations
-                // (either in the foreground or in the background during swiping) - that can be achieved
-                // using SaveableStateHolder and rememberSaveable as shown below.
-                saveableStateHolder.SaveableStateProvider(
-                    key = "MainKey"
-                ) {
-                    // Composable that maintains its own state
-                    // and can be shown in foreground or background.
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        verticalArrangement =
-                        Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
-                    ) {
-
-                        HeartRateMeasurementTypeDisplayPage(
-                            Modifier,
-                            heartRateMeasurementTypeOptions,
-                            pickerState,
-                            navigator,
-                            averageMeasurementTimeState,
-                            hrMeasurementTypeChipSelectState
-                        ) { showMainScreen = false }
-                    }
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    if (hrMeasurementTypeChipSelectState.value == 0) {
-                        HeartRateMeasurementTypePickerView(
-                            Modifier,
-                            pickerState,
-                            heartRateMeasurementTypeOptions
-                        ) {
-                            showMainScreen = true
-                        }
-                    } else {
-                        AverageMeasurementTimePickerView(
-                            modifier,
-                            averageMeasurementTimeState,
-                            timePickerState
-                        )
-                    }
-
-
-                }
-            }
-
-        }
-    }
-}
 
 @Composable
-fun HeartRateMeasurementTypeDisplayPage(
+fun TimeTaskDetailsPage(
     modifier: Modifier = Modifier,
-    options: List<String>,
-    pickerState: PickerState,
     navigator: DestinationsNavigator,
-    averageMeasurementTimeState: MutableState<LocalTime>,
-    hrMeasurementTypeChipSelectState: MutableState<Int>,
-    onClick: () -> Unit
+    alarmState: MutableState<Alarm>,
+    timeState: MutableState<FullHours>,
+    heartRateState: MutableState<Int>
 ) {
 
     WearAppTheme {
+
 
 
         Column(
@@ -546,93 +464,6 @@ fun HeartRateMeasurementTypeDisplayPage(
             verticalArrangement = Arrangement.Center,
         ) {
 
-
-            Chip(
-
-                modifier = modifier,
-
-                colors = ChipDefaults.chipColors(
-                    backgroundColor = Color.Transparent
-                ),
-                enabled = true,
-                label = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        text = "HR Measure Type",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-
-                },
-                secondaryLabel = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-
-                        text = options[pickerState.selectedOption],
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-
-                },
-                icon = {
-                    Icon(
-                        Icons.Filled.ArrowForwardIos,
-                        contentDescription = "Select Heart Rate Measurement Type"
-                    )
-                },
-                onClick = {
-                    hrMeasurementTypeChipSelectState.value = 0
-                    onClick()
-                }
-            )
-
-            Chip(
-
-                modifier = modifier,
-
-                colors = ChipDefaults.chipColors(
-                    backgroundColor = Color.Transparent
-                ),
-                enabled = pickerState.selectedOption == 1,
-                label = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        text = "Time To Measure",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-
-                },
-                secondaryLabel = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-
-                        text = averageMeasurementTimeState.value.toString(),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-
-                },
-                icon = {
-                    Icon(
-                        Icons.Filled.ArrowForwardIos,
-                        contentDescription = "Time To Measure"
-                    )
-                },
-                onClick = {
-
-                    hrMeasurementTypeChipSelectState.value = 1
-                    onClick()
-
-                }
-            )
-
             Chip(
 
                 modifier = modifier,
@@ -643,7 +474,7 @@ fun HeartRateMeasurementTypeDisplayPage(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        text = "Create Time Task",
+                        text = "Create Alarm",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -653,7 +484,7 @@ fun HeartRateMeasurementTypeDisplayPage(
                 icon = {
                     Icon(
                         Icons.Filled.MoreTime,
-                        contentDescription = "Create Time Task Button"
+                        contentDescription = "Create Alarm Button"
                     )
                 }, onClick = { navigator.navigate(WearAppDestination) }
             )
@@ -705,65 +536,6 @@ fun HeartRateMeasurementTypePickerView(
 
 }
 
-@Composable
-fun AverageMeasurementTimePickerView(
-    modifier: Modifier = Modifier,
-    averageTimePickerState: MutableState<LocalTime>,
-    timePickerState: MutableState<Hours>
-) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            var hourPickerValue by remember { mutableStateOf(0) }
-
-            var minutePickerValue by remember { mutableStateOf(0) }
-
-            NumberPicker(
-                leadingZero = true,
-                value = minutePickerValue,
-                range = 0..10/*timePickerState.value.hours*/,
-                onValueChange = {
-                    minutePickerValue = it
-                },
-                textStyle = TextStyle(Color.White)
-
-            )
-            Text(
-                modifier = Modifier.size(24.dp),
-                textAlign = TextAlign.Center,
-                text = ":"
-
-            )
-
-            NumberPicker(
-                leadingZero = true,
-                value = minutePickerValue,
-                range = 0..timePickerState.value.minutes,
-                onValueChange = {
-                    minutePickerValue = it
-                },
-                textStyle = TextStyle(Color.White)
-
-            )
-
-            averageTimePickerState.value = LocalTime.of(hourPickerValue, minutePickerValue)
-        }
-
-
-    }
-}
 
 @Preview(
     widthDp = WEAR_PREVIEW_DEVICE_WIDTH_DP,
@@ -778,7 +550,9 @@ fun AlarmTypePickerPagePreview() {
     WearAppTheme {
         val alarmTypeOptions = arrayListOf<String>("Clock Time", "Elapsed Timer")
         val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
-        AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions) {}
+        val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
+
+        AlarmTypePickerPage(Modifier, pickerState, alarmTypeOptions, alarmState) {}
     }
 }
 
@@ -796,9 +570,9 @@ fun AlarmTypePickerPagePreview() {
 fun AlarmTypePagePreview() {
     WearAppTheme {
         val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
-        val timeTaskState: MutableState<TimeTask> = remember { mutableStateOf(TimeTask()) }
+        val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
 
-        AlarmTypePage(Modifier, EmptyDestinationsNavigator, pickerState, timeTaskState)
+        AlarmTypePage(Modifier, EmptyDestinationsNavigator, pickerState, alarmState)
     }
 }
 
@@ -814,10 +588,11 @@ fun AlarmTypePagePreview() {
 @Composable
 fun HeartRatePagePreview() {
     WearAppTheme {
-        val heartRateState: MutableState<Int> =
-            remember { mutableStateOf(70) }        // Display 10 items
+        // Display 10 items
+        val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
+        val heartRateState: MutableState<Int> = remember { mutableStateOf(70) }
 
-        HeartRatePage(Modifier, heartRateState)
+        HeartRatePage(Modifier, alarmState, heartRateState)
     }
 }
 
@@ -834,8 +609,9 @@ fun HeartRatePagePreview() {
 @Composable
 fun TimeSelect24HourViewPreview() {
     val timePickerState = remember { mutableStateOf<Hours>(FullHours(0, 0)) }
+    val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
 
-    TimeSelect24HourView(Modifier, timePickerState)
+    TimeSelect24HourView(Modifier, alarmState)
 }
 
 @Preview(
@@ -850,8 +626,9 @@ fun TimeSelect24HourViewPreview() {
 @Composable
 fun TimeSelect12HourViewPreview() {
     val timePickerState = remember { mutableStateOf<Hours>(AMPMHours(12, 0, AMPMHours.DayTime.AM)) }
+    val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
 
-    TimeSelect12HourView(Modifier, timePickerState)
+    TimeSelect12HourView(Modifier, alarmState)
 }
 
 @Preview(
@@ -863,21 +640,22 @@ fun TimeSelect12HourViewPreview() {
     showBackground = WEAR_PREVIEW_SHOW_BACKGROUND
 )
 @Composable
-fun HeartRateMeasurementTypePagePreview() {
+fun TimeTaskDetailsPagePreview() {
     WearAppTheme {
-        val pickerState = rememberPickerState(initialNumberOfOptions = 2, repeatItems = false)
-        val averageMeasurementTimeState: MutableState<LocalTime> =
-            remember { mutableStateOf(LocalTime.MIN) }
-        val timePickerState =
-            remember { mutableStateOf<Hours>(AMPMHours(12, 0, AMPMHours.DayTime.AM)) }
 
-        HeartRateMeasurementTypePage(
+        val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
+        val fullHoursPickerState: MutableState<FullHours> =
+            remember { mutableStateOf<FullHours>(FullHours(0, 0)) }
+        val heartRateState: MutableState<Int> = remember { mutableStateOf(70) }
+
+        TimeTaskDetailsPage(
             Modifier,
             EmptyDestinationsNavigator,
-            pickerState,
-            averageMeasurementTimeState,
-            timePickerState
+            alarmState,
+            fullHoursPickerState,
+            heartRateState
         )
+
     }
 }
 
@@ -907,10 +685,59 @@ fun HeartRateMeasurementTypePickerPagePreview() {
 )
 //Clock time, time select preview, 24 hour format
 @Composable
-fun AverageMeasurementTimePickerViewPreview() {
-    val averageMeasurementTimeState: MutableState<LocalTime> =
-        remember { mutableStateOf(LocalTime.MIN) }
-    val timePickerState =
-        remember { mutableStateOf<Hours>(AMPMHours(12, 0, AMPMHours.DayTime.AM)) }
-    AverageMeasurementTimePickerView(Modifier, averageMeasurementTimeState, timePickerState)
+fun StateTextChangePreview() {
+    val timePickerState = remember { mutableStateOf<Hours>(FullHours(0, 0)) }
+    val alarmState: MutableState<Alarm> = remember { mutableStateOf(Alarm()) }
+
+    LaunchedEffect(alarmState.value) {
+
+    }
+
+    WearAppTheme {
+        TimeSelect24HourView(Modifier, alarmState)
+
+    }
 }
+
+@Preview(
+    widthDp = WEAR_PREVIEW_DEVICE_WIDTH_DP,
+    heightDp = WEAR_PREVIEW_DEVICE_HEIGHT_DP,
+    apiLevel = WEAR_PREVIEW_API_LEVEL,
+    uiMode = WEAR_PREVIEW_UI_MODE,
+    backgroundColor = WEAR_PREVIEW_BACKGROUND_COLOR_BLACK,
+    showBackground = WEAR_PREVIEW_SHOW_BACKGROUND
+)
+@Composable
+fun ButtonVibrateTestPreview(){
+    /*val mVibratePattern = longArrayOf(0, 400, 200, 400)
+    val vibrator: Vibrator =  Vibrator()
+    val vibrationEffect: VibrationEffect? = null*/
+   /* val vibrator:Vibrator
+    vibrator = getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    vibrator.vibrate(100)*/
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ){
+        Button(
+            content = {
+                Text("Vibrate")
+            },
+            onClick = {
+                /*if (vibrator != null) {
+                    vibrator.vibrate(vibrationEffect)
+                }*/
+                val contentProvider: ContentProvider
+                //vibrateDevice(requireContext())
+
+            })
+    }
+
+
+
+
+}
+
